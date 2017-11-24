@@ -386,6 +386,48 @@ int HeapCheck() {
 
 OK, 到此为止，希望对你有帮助
 
+##补充
+
+###下面对一些具体的测试用例使用GDB调试观察地址及其内容
+
+####Test case2
+
+![](pictures/Test%20case2.png)
+
+我们知道，字符串`str`在分配内存时应分配`8+1('\0')`大小的内存。所以说这个`BLOCK`中`Footer`里面的`fence`应该被改写了，让我们来看一些内存中的内容
+
+```
+//首先生成可用gdb调试的版本
+gcc -g *.c -o debugmalloc
+
+```
+
+在检查出错的函数`check_block`加入断点
+
+![](pictures/case2_bp.png)
+
+使用`-t`参数运行第二个测试用例
+
+![](pictures/case2_r.png)
+
+我们看到断点发生在`debugmalloc.c:135行`，此时`ptr`的地址值为`0x100300070`
+
+**注意：**因为对`generic pointer(void *)`强制转化为`HEADER *`，并且`h_p = (HEADER *)ptr - 1`，这里面的-1实际上减去了`1 * sizeof(HEADER)`，也就是减去了`16`
+
+我们继续用`n`来让程序继续往下单步运行
+
+![](pictures/case2_error.png)
+
+由于该用例只分配了8个内存，并且8是8的整数倍，不需要分配额外的内存来使内存对齐，所以说我们看到的`h_p`的地址为`0x100300078`，比`ptr`高`8`字节，但是`fence`的值和`f_fence`的值不同，说明尾部信息被篡改了，即分配内存不足，接下来让我们继续运行程序，得到相应的结果
+
+![](pictures/case2_result.png)
+
+符合上面的正确答案。
+
+
+
+
+
 **by 一枝猪**
 
 
