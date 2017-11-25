@@ -424,6 +424,43 @@ gcc -g *.c -o debugmalloc
 
 符合上面的正确答案。
 
+-------------------------------
+
+再让我们看一个头部信息被改变的实例
+
+####Test case6
+
+![](pictures/Test%20case6.png)
+
+先看下面这行代码
+
+
+```
+//把ptr低8字节的地址中的int数据改为 8 + (1 << 31);
+*((int *)(ptr - 8)) = 8 + (1 << 31);
+
+```
+
+这时候我们再看我们最初定义的`Header`结构
+
+```
+struct Header{
+	int checkSum;
+	int size;
+	long fence;
+}
+```
+
+很明显，他是想通过更改`Header`中的`fence`来出错，那让我们用`gdb`跟踪调试一下，看个究竟。
+
+![](pictures/case6_error.png)
+
+继续执行，得到最终结果
+
+![](pictures/case6_result.png)
+
+符合上面的答案。
+
 
 
 
