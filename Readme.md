@@ -462,6 +462,11 @@ struct Header{
 符合上面的答案。
 
 
+##最后补充
+
+假设我们分配了两次，没有进行free，整个程序的内部结构大概为下图
+
+![](pictures/stack.png)
 
 
 
